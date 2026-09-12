@@ -1,0 +1,52 @@
+name: publish-oss
+
+# Runs scripts/publish-oss/publish.sh: one flattened snapshot of main, with the
+# deployment values scrubbed, pushed to ConflictHQ/ezacto-portal-oss.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build and gate the snapshot; do not push"
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      dry_run:
+        type: boolean
+        default: false
+    secrets:
+      OSS_PUBLISH_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-oss
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Tools
+        run: |
+          set -euo pipefail
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.30.0/gitleaks_8.30.0_linux_x64.tar.gz | tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+      - name: Deploy key
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s\n' "$OSS_PUBLISH_KEY" > "$RUNNER_TEMP/oss-publish-key"
+        env:
+          OSS_PUBLISH_KEY: ${{ secrets.OSS_PUBLISH_KEY }}
+      - name: Publish
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ./scripts/publish-oss/publish.sh; else ./scripts/publish-oss/publish.sh --push; fi
+        env:
+          PUBLISH_OSS_KEY: ${{ runner.temp }}/oss-publish-key
