@@ -1,8 +1,11 @@
 name: publish-oss
 
 # Runs scripts/publish-oss/publish.sh: one flattened snapshot of main, with the
-# deployment values scrubbed, pushed to ConflictHQ/ezacto-portal-oss.
+# deployment values scrubbed, pushed to ConflictHQ/ezacto-portal-oss. A tag
+# v<version> on main publishes; so does a dispatch.
 on:
+  push:
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       dry_run:
@@ -32,6 +35,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
+      - name: A release tag must point at a commit on main
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor "$GITHUB_SHA" HEAD || { echo "tag ${GITHUB_REF_NAME} is not on main" >&2; exit 1; }
+          git reset --hard "$GITHUB_SHA"
       - name: Tools
         run: |
           set -euo pipefail
