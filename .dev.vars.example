@@ -1,0 +1,7 @@
+# Copy to .dev.vars for `wrangler dev`. Production values go in with
+# `wrangler secret put <NAME>`; the non-secret ones live in wrangler.toml [vars].
+EZACTO_API_TOKEN=ezacto_...            # read-only token: clients:read projects:read reports:read team:read invoices:read time_entries:read
+TURNSTILE_SECRET_KEY=0x...             # pairs with TURNSTILE_SITE_KEY in wrangler.toml
+CLOUDFLARE_API_TOKEN=...               # Email Sending: Account > Email > Send permission
+MAILGUN_API_KEY=                       # optional: with MAILGUN_DOMAIN/REGION vars, sends through Mailgun
+DEMO_SIGN_IN_PASSWORD=                 # demo deployments only; pairs with DEMO_SIGN_IN_EMAIL

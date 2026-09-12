@@ -1,0 +1,67 @@
+name = "ezacto-portal"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+workers_dev = false
+
+# Your portal hostname. Create the custom domain in the zone first, or let
+# wrangler create it on deploy.
+routes = [
+  { pattern = "portal.example.com", custom_domain = true }
+]
+
+# Deploy-specific values. Secrets (EZACTO_API_TOKEN, TURNSTILE_SECRET_KEY, and
+# CLOUDFLARE_API_TOKEN or MAILGUN_API_KEY) are set with `wrangler secret put`,
+# never here. See README.md for every variable.
+[vars]
+EZACTO_BASE_URL = "https://time.example.com"
+TURNSTILE_SITE_KEY = "replace-me-turnstile-site-key"
+CLOUDFLARE_ACCOUNT_ID = "replace-me-account-id"
+MAIL_FROM_ADDRESS = "portal@example.com"
+MAIL_FROM_NAME = "Example Client Portal"
+# Optional: override the name, marks and palette ezacto reports. Omit for
+# ezacto's own look. See README.md.
+# BRAND_NAME = "Example LLC"
+# BRAND_ACCENT = "#16794A"
+
+# Create with `wrangler kv namespace create <BINDING>` and paste the ids.
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "replace-me-kv-id"
+
+[[kv_namespaces]]
+binding = "MAGIC_TOKENS"
+id = "replace-me-kv-id"
+
+[[kv_namespaces]]
+binding = "RATE_LIMITS"
+id = "replace-me-kv-id"
+
+# A demo deployment against a demo ezacto instance: no EZACTO_API_TOKEN, the
+# Worker mints one from the published demo account (DEMO_SIGN_IN_PASSWORD is a
+# secret) and "View the demo" seats visitors on DEMO_CLIENT_ID. ezacto's own
+# demo portal, portal.ezacto.io, is this env pointed at ezacto.io.
+[env.demo]
+name = "ezacto-portal-demo"
+workers_dev = false
+routes = [
+  { pattern = "portal-demo.example.com", custom_domain = true }
+]
+
+[env.demo.vars]
+EZACTO_BASE_URL = "https://demo.example.com"
+DEMO_SIGN_IN_EMAIL = "admin@demo.example.com"
+DEMO_CLIENT_ID = "1"
+TURNSTILE_SITE_KEY = "replace-me-turnstile-site-key"
+MAIL_FROM_ADDRESS = "portal@example.com"
+
+[[env.demo.kv_namespaces]]
+binding = "SESSIONS"
+id = "replace-me-kv-id"
+
+[[env.demo.kv_namespaces]]
+binding = "MAGIC_TOKENS"
+id = "replace-me-kv-id"
+
+[[env.demo.kv_namespaces]]
+binding = "RATE_LIMITS"
+id = "replace-me-kv-id"
